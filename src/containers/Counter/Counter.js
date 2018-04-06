@@ -1,68 +1,48 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import * as actionCreators from '../../Store/actions/index';
 
 import CounterControl from '../../components/CounterControl/CounterControl';
 import CounterOutput from '../../components/CounterOutput/CounterOutput';
-import {connect} from 'react-redux';
-import * as actionType from '../../Store/actions'
 
 class Counter extends Component {
-    state = {
-        counter: 0
-    }
-
-    counterChangedHandler = ( action, value ) => {
-        switch ( action ) {
-            case 'inc':
-                this.setState( ( prevState ) => { return { counter: prevState.counter + 1 } } )
-                break;
-            case 'dec':
-                this.setState( ( prevState ) => { return { counter: prevState.counter - 1 } } )
-                break;
-            case 'add':
-                this.setState( ( prevState ) => { return { counter: prevState.counter + value } } )
-                break;
-            case 'sub':
-                this.setState( ( prevState ) => { return { counter: prevState.counter - value } } )
-                break;
-        }
-    }
-
     render () {
         return (
             <div>
                 <CounterOutput value={this.props.ctr} />
-                <CounterControl label="Increment" clicked={this.props.onIncCounter} />
-                <CounterControl label="Decrement" clicked={this.props.onDecCounter}  />
+                <CounterControl label="Increment" clicked={this.props.onIncrementCounter} />
+                <CounterControl label="Decrement" clicked={this.props.onDecrementCounter}  />
                 <CounterControl label="Add 10" clicked={this.props.onAddCounter}  />
-                <CounterControl label="Subtract 15" clicked={this.props.onSubCounter}  />
+                <CounterControl label="Subtract 15" clicked={this.props.onSubtractCounter}  />
                 <hr />
-                <button onClick={this.props.StoreResult}>Store Result</button>
+                <button onClick={() => this.props.onStoreResult(this.props.ctr)}>Store Result</button>
                 <ul>
-                  {this.props.storedResults.map(result => {
-                    return <li key={ result.id } onClick={() => this.props.DeleteResult(result.id)}>{result.val}</li>
-                  })}
+                    {this.props.storedResults.map(strResult => (
+                        <li key={strResult.id} onClick={() => this.props.onDeleteResult(strResult.id)}>{strResult.value}</li>
+                    ))}
                 </ul>
             </div>
         );
     }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    ctr: state.counter,
-    storedResults: state.result                            // connect actually returns the function which retuns the HOC.
-  }                                     // state is automatically passed on by the redux by which we can access it.
-}
+const mapStateToProps = state => {
+    return {
 
-const mapDispatchToProps = (dispatch) => {      //These dispactha nd state args are provided by the react-redux;
-  return {
-    onIncCounter: () => dispatch(actionType.increment()),   // We pass a method we want to dispatch.
-    onDecCounter: () => dispatch(actionType.decrement()),
-    onAddCounter: () => dispatch(actionType.add(10)),
-    onSubCounter: () => dispatch(actionType.subtract(15)),
-    StoreResult: () => dispatch(actionType.store()),
-    DeleteResult: (elId) => dispatch(actionType.del(elId))
-  }
-}
+        ctr: state.ctr.counter,
+        storedResults: state.res.results
+    }
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onIncrementCounter: () => dispatch(actionCreators.increment()),
+        onDecrementCounter: () => dispatch(actionCreators.decrement()),
+        onAddCounter: () => dispatch(actionCreators.add(10)),
+        onSubtractCounter: () => dispatch(actionCreators.subtract(15)),
+        onStoreResult: (result) => dispatch(actionCreators.storeResult(result)),
+        onDeleteResult: (id) => dispatch(actionCreators.deleteResult(id))
+    }
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Counter);
